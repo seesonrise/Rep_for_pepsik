@@ -49,6 +49,13 @@ public class SmartEnemyScript : MonoBehaviour
 		scale.x *= -1;
 		transform.localScale = scale;
 	}
+	private void OnCollisionEnter2D(Collision2D collision)
+   	{	
+		if(collision.gameObject.name == "Player")
+		{
+			GetComponent<Health>().DoDamage(_enemyDamage);
+		}
+    	}
 	private void OnDrawGizmos()
 	{
 		Gizmos.color = Color.green;
