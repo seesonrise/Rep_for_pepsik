@@ -4,8 +4,10 @@ public class SmartEnemyScript : MonoBehaviour
 {
 	[SerializeField] private float _walkSpeed;
 	[SerializeField] private Transform _headZone;
-	[SerializeField] private Vector2 _boxScale;
+	[SerializeField] private Vector2 _boxReflectScale;
+	[SerializeField] private Transform _reflectZone;
 	[SerializeField] private LayerMask _playerLayer;
+	[SerfilizeFiled] private Vector2 _boxHeadScale;
 	[SerializeField][Range(0f, 100f)] private float _raycastDistance;
 	private bool _faceRight;
 
@@ -31,16 +33,21 @@ public class SmartEnemyScript : MonoBehaviour
 		{
 			Destroy(gameObject);
 		}
-		if (Physics2D.Raycast(transform.position, Vector2.right, _raycastDistance) && !_faceRight)
+		if (Reflect() && !_faceRight)
 		{
 			Flip();
 		}
-		else if (Physics2D.Raycast(transform.position, Vector2.left, _raycastDistance) && _faceRight)
+		else if Reflect() && _faceRight)
 		{
 			Flip();
 		}
 		Move();
 	}
+	private bool Reflect() // Ïðîâåðêà íà ïîâåðõíîñòü
+    	{
+        var reflect = Physics2D.OverlapBox(_groundCheck.position, _boxScale);
+        return reflect != null;
+    	}
 	private void Flip()
 	{
 		_walkSpeed *= -1;
@@ -59,6 +66,7 @@ public class SmartEnemyScript : MonoBehaviour
 	private void OnDrawGizmos()
 	{
 		Gizmos.color = Color.green;
-		Gizmos.DrawWireCube(_headZone.position, _boxScale);
+		Gizmos.DrawWireCube(_headZone.position, _boxHeadScale);
+		Gizmos.DrawWireCube(_reflectZone.position, _boxReflectScale);
 	}
 }
