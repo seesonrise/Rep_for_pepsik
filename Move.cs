@@ -1,10 +1,14 @@
+using TMPro;
 using UnityEngine;
 
 public class Move : MonoBehaviour
 {
     [SerializeField] private float _speed;
     [SerializeField] private float _jumpForce;
-    private Rigidbody2D _rigidbody;
+    [SerializeField] private Transform _scoreText;
+    [SerializeField][HideInInspector] private int _score;
+    [SerializeField][HideInInspector] private TextMeshProUGUI _scoreCounter;
+    [SerializeField][HideInInspector] private Rigidbody2D _rigidbody;
     private float _inputX;
     [SerializeField] private Vector2 _boxScale;
     [SerializeField] private LayerMask _groundLayer;
@@ -14,6 +18,7 @@ public class Move : MonoBehaviour
 
     private void Awake()
     {
+        _scoreCounter = _scoreText.GetComponent<TextMeshProUGUI>();
         _rigidbody = GetComponent<Rigidbody2D>();
     }
     private void Update()
@@ -27,6 +32,11 @@ public class Move : MonoBehaviour
         {
             DoJump();
         }
+    }
+    public void AddScore(int score) 
+    {
+        _score += score;
+        _scoreCounter.text = "Score: "+_score.ToString();
     }
     void CaptureInput()
     {
