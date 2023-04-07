@@ -5,6 +5,7 @@ public class TeleportDoor : MonoBehaviour
 {
     private GameObject _player;
     [SerializeField] private Vector2 _offSet;
+    [SerializeField] private Vector2 _teleportZoneScale;
     private Transform _textObject;
     private TextMeshPro _text;
 
@@ -37,6 +38,6 @@ public class TeleportDoor : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawWireCube(new Vector2(transform.position.x + _offSet.x, transform.position.y + _offSet.y), new Vector2(1f,1f));
+        Gizmos.DrawWireCube(new Vector2(transform.position.x + _offSet.x, transform.position.y + _offSet.y), _teleportZoneScale);
     }
 }
