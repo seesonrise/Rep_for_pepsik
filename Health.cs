@@ -23,7 +23,7 @@ public class Health : MonoBehaviour
 	}
 	[SerializeField] public float maxhealth
 	{
-		get => maxhealth;
-		set => maxhealth = value;
+		get => _maxHealth;
+		set => _maxHealth = value;
 	}
 }
