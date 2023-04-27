@@ -5,15 +5,15 @@ public class PlayerAnimation : MonoBehaviour
     [SerializeField] private Animator animator;
     private void Start()
     {
-        animator = GetComponent<Animator>(); // Компонент Аниматора
+        animator = GetComponent<Animator>(); // ГЉГ®Г¬ГЇГ®Г­ГҐГ­ГІ ГЂГ­ГЁГ¬Г ГІГ®Г°Г 
     }
     private void ChangingAnimation()
     {
-        animator.SetBool("Run", !animator.GetBool("Run")); // Обращения к параметру bool и уствновка на обратное значения (Если True то False или на оборот)
+        animator.SetBool("Run", !animator.GetBool("Run")); // ГЋГЎГ°Г Г№ГҐГ­ГЁГї ГЄ ГЇГ Г°Г Г¬ГҐГІГ°Гі bool ГЁ ГіГ±ГІГўГ­Г®ГўГЄГ  Г­Г  Г®ГЎГ°Г ГІГ­Г®ГҐ Г§Г­Г Г·ГҐГ­ГЁГї (Г…Г±Г«ГЁ True ГІГ® False ГЁГ«ГЁ Г­Г  Г®ГЎГ®Г°Г®ГІ)
     }
     private void FixedUpdate()
     {
-        if (Input.GetKey(KeyCode.R)) // Вызов метода на клавишу R
+        if (Input.GetButton("Horizontal")) // Г‚Г»Г§Г®Гў Г¬ГҐГІГ®Г¤Г  Г­Г  ГЄГ«Г ГўГЁГёГі R
         {
             ChangingAnimation();
         }
