@@ -35,6 +35,9 @@ public class Move : MonoBehaviour
 	}
 	private void Update()
 	{
+	if (Grounded()){
+	   _wallClimbing = false;
+	}
         CaptureInput();
 		if (_inputX != 0)
 		{
@@ -67,17 +70,17 @@ public class Move : MonoBehaviour
 		_inputX = Input.GetAxis("Horizontal");
 		_animator.SetFloat("Run", Mathf.Abs(_inputX));
 	}
-	private void DoJump() // Прыжок
+	private void DoJump() // ГЏГ°Г»Г¦Г®ГЄ
 	{
 		if (Grounded())
 		{
 			_animator.SetTrigger("Jump");
-			_rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _jumpForce); // Установка вектора прыжка
+			_rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _jumpForce); // Г“Г±ГІГ Г­Г®ГўГЄГ  ГўГҐГЄГІГ®Г°Г  ГЇГ°Г»Г¦ГЄГ 
 		}
 	}
-	private bool Grounded() // Проверка на поверхность
+	private bool Grounded() // ГЏГ°Г®ГўГҐГ°ГЄГ  Г­Г  ГЇГ®ГўГҐГ°ГµГ­Г®Г±ГІГј
 	{
-		var _ground = Physics2D.OverlapBox(_groundCheck.position, new Vector2(_boxScale.x, _boxScale.y), 0, _groundLayer); // Проверка всех колидиров с маской _groundLayer 
+		var _ground = Physics2D.OverlapBox(_groundCheck.position, new Vector2(_boxScale.x, _boxScale.y), 0, _groundLayer); // ГЏГ°Г®ГўГҐГ°ГЄГ  ГўГ±ГҐГµ ГЄГ®Г«ГЁГ¤ГЁГ°Г®Гў Г± Г¬Г Г±ГЄГ®Г© _groundLayer 
 		_animator.SetBool("Grounded", _ground != null);
 		return _ground != null;
 	}
@@ -100,12 +103,12 @@ public class Move : MonoBehaviour
         print(heading.x);
 		if (!_facingRight && heading.x < 0)
 		{
-			print("Меня повернуло в право");
+			print("ГЊГҐГ­Гї ГЇГ®ГўГҐГ°Г­ГіГ«Г® Гў ГЇГ°Г ГўГ®");
 			GetComponent<SpriteRenderer>().flipX = false;
         }
 		if (_facingRight && heading.x > 0)
 		{
-            print("Меня повернуло в лево");
+            print("ГЊГҐГ­Гї ГЇГ®ГўГҐГ°Г­ГіГ«Г® Гў Г«ГҐГўГ®");
             GetComponent<SpriteRenderer>().flipX = true;
         }
 		_animator.SetTrigger("WallClimbing");
@@ -113,6 +116,6 @@ public class Move : MonoBehaviour
 	private void OnDrawGizmos()
 	{
 		Gizmos.color = Color.green;
-		Gizmos.DrawWireCube(_groundCheck.position, new Vector2(_boxScale.x, _boxScale.y)); // Зона проверки земли
+		Gizmos.DrawWireCube(_groundCheck.position, new Vector2(_boxScale.x, _boxScale.y)); // Г‡Г®Г­Г  ГЇГ°Г®ГўГҐГ°ГЄГЁ Г§ГҐГ¬Г«ГЁ
 	}
 }
