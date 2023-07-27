@@ -1,121 +1,148 @@
-using TMPro;
 using UnityEngine;
+using UnityEditor;
 
+internal enum TypeMove { StandartMove, CellMove }
+[RequireComponent(typeof(Rigidbody2D))]
 public class Move : MonoBehaviour
 {
-	[Header("Move")]
-	[SerializeField] private float _speed;
-	[SerializeField] private float _jumpForce;
-    [SerializeField][HideInInspector] private Rigidbody2D _rigidbody;
-	private float _inputX;
-	[Space(1)]
-	[Header("Score")]
-	[SerializeField] private Transform _scoreText;
-	[SerializeField][HideInInspector] private int _score;
-	[SerializeField][HideInInspector] private TextMeshProUGUI _scoreCounter;
-	[Space(1)]
-	[Header("Ground Check")]
-	[SerializeField] private Vector2 _boxScale;
-    [SerializeField] private LayerMask _groundLayer;
-    [SerializeField] private Transform _groundCheck;
-    [Space(1)]
-	[Header("Climbing Check")]
-    [SerializeField] private LayerMask _wallLayer;
-	[SerializeField, HideInInspector] private bool _facingRight;
-	[SerializeField, HideInInspector] private bool _wallClimbing;
+	private Rigidbody2D _rb;
+	[SerializeField] internal TypeMove TypeMove;
 
-	[SerializeField, HideInInspector] private Animator _animator;
+	#region CellMove
+	[SerializeField] internal Vector2 CellSize;
+	[SerializeField] internal float SmoothTime;
+	[SerializeField] internal LayerMask WallLayer;
+	#endregion
 
-
+	#region StandarMove
+	[SerializeField] internal float Speed;
+	[SerializeField] internal float JumpForce;
+	[SerializeField] internal GameObject GroundBox;
+	[SerializeField] internal Vector2 BoxSize;
+	[SerializeField] internal LayerMask GroundLayer;
+	private float InputX;
+	private float InputY;
+	#endregion
 	private void Awake()
 	{
-		_scoreCounter = _scoreText.GetComponent<TextMeshProUGUI>();
-		_rigidbody = GetComponent<Rigidbody2D>();
-		_animator = GetComponent<Animator>();
-	}
-	private void Update()
-	{
-	if (Grounded()){
-	   _wallClimbing = false;
-	}
-        CaptureInput();
-		if (_inputX != 0)
-		{
-			DoMove();
-		}
-        if (Input.GetButton("Jump"))
-		{
-			DoJump();
-		}
+		_rb = GetComponent<Rigidbody2D>();
 	}
 
-
-	public void AddScore(int score)
+	private void CellMove()
 	{
-		_score += score;
-		_scoreCounter.text = "Score: " + _score.ToString();
-	}
-    private void DoMove()
-    {
-		if (!_wallClimbing)
+		_rb.bodyType = RigidbodyType2D.Static;
+		if (Input.GetKeyDown(KeyCode.D) && !Physics2D.Raycast(transform.position, Vector2.right, 1f, WallLayer))
 		{
-            GetComponent<SpriteRenderer>().flipX = _inputX < 0;
-        }
-        _facingRight = _inputX > 0;
-        _rigidbody.velocity = new Vector2(_speed * _inputX, _rigidbody.velocity.y);
+			transform.position = new Vector2(transform.position.x + CellSize.x, transform.position.y);
+		}
+		if (Input.GetKeyDown(KeyCode.A) && !Physics2D.Raycast(transform.position, Vector2.left, 1f, WallLayer))
+		{
+			transform.position = new Vector2(transform.position.x - CellSize.x, transform.position.y);
+		}
+		if (Input.GetKeyDown(KeyCode.W) && !Physics2D.Raycast(transform.position, Vector2.up, 1f, WallLayer))
+		{
+			transform.position = new Vector2(transform.position.x, transform.position.y + CellSize.y);
+		}
+		if (Input.GetKeyDown(KeyCode.S) && !Physics2D.Raycast(transform.position, Vector2.down,1f,WallLayer))
+		{
+			transform.position = new Vector2(transform.position.x, transform.position.y - CellSize.y);
+		}
+	}
+	private void StandartMove()
+	{
+		Moving();
+		if (Input.GetButton("Jump") && DoGrounded())
+		{
+			Jump();
+		}
+	}
+	private bool DoMove(Vector2 dir)
+	{
+		Debug.DrawLine(transform.localPosition, dir, Color.green);
+
+		if (Physics2D.Raycast(transform.position, dir).transform.gameObject.layer == WallLayer.value)
+		{
+			return false;
+		}
+		return true;
+	}
+	private bool DoGrounded()
+	{
+		return Physics2D.OverlapBox(GroundBox.transform.position, BoxSize, 0, GroundLayer) != null;
+	}
+    private void Moving()
+	{
+        _rb.velocity = new Vector2(Speed * InputX, _rb.velocity.y);
     }
-
-    void CaptureInput()
+	private void InputHandler()
 	{
-		_inputX = Input.GetAxis("Horizontal");
-		_animator.SetFloat("Run", Mathf.Abs(_inputX));
+		InputX = Input.GetAxis("Horizontal");
+		InputY = Input.GetAxis("Vertical");
 	}
-	private void DoJump() // Ïðûæîê
+	
+	private void Jump()
 	{
-		if (Grounded())
-		{
-			_animator.SetTrigger("Jump");
-			_rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _jumpForce); // Óñòàíîâêà âåêòîðà ïðûæêà
-		}
+		_rb.velocity = new Vector2(_rb.velocity.x,JumpForce);
 	}
-	private bool Grounded() // Ïðîâåðêà íà ïîâåðõíîñòü
-	{
-		var _ground = Physics2D.OverlapBox(_groundCheck.position, new Vector2(_boxScale.x, _boxScale.y), 0, _groundLayer); // Ïðîâåðêà âñåõ êîëèäèðîâ ñ ìàñêîé _groundLayer 
-		_animator.SetBool("Grounded", _ground != null);
-		return _ground != null;
-	}
-
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void Update()
     {
-        var hit = Physics2D.OverlapBox(transform.position, transform.localScale, 0, _wallLayer);
-        _wallClimbing = hit != null;
-        if (hit) 
-		{
-            Debug.Log("I touch a wall");
-            WallClimbing(collision.transform.position);
-		}
+        if (TypeMove == TypeMove.CellMove)
+        {
+			CellMove();
+        }
+        if (TypeMove == TypeMove.StandartMove)
+        {
+            if (_rb.bodyType == RigidbodyType2D.Static) _rb.bodyType = RigidbodyType2D.Dynamic;
+            StandartMove();
+        }
+        InputHandler();
     }
-
-    private void WallClimbing(Vector3 wallPosition)
+    internal string[] GetLayerNames()
     {
-		var heading = wallPosition - transform.position;
+        int maxLayers = 32;
 
-        print(heading.x);
-		if (!_facingRight && heading.x < 0)
-		{
-			print("Ìåíÿ ïîâåðíóëî â ïðàâî");
-			GetComponent<SpriteRenderer>().flipX = false;
+        string[] layerNames = new string[maxLayers];
+
+        for (int i = 0; i < maxLayers; i++)
+        {
+            string layerName = LayerMask.LayerToName(i);
+			if (layerName != "\r\n") { layerNames[i] = layerName; }
         }
-		if (_facingRight && heading.x > 0)
-		{
-            print("Ìåíÿ ïîâåðíóëî â ëåâî");
-            GetComponent<SpriteRenderer>().flipX = true;
-        }
-		_animator.SetTrigger("WallClimbing");
+
+        return layerNames;
     }
-	private void OnDrawGizmos()
-	{
+    private void OnDrawGizmosSelected()
+    {
 		Gizmos.color = Color.green;
-		Gizmos.DrawWireCube(_groundCheck.position, new Vector2(_boxScale.x, _boxScale.y)); // Çîíà ïðîâåðêè çåìëè
+		Gizmos.DrawWireCube(GroundBox.transform.position, BoxSize);
+    }
+}
+
+[CustomEditor(typeof(Move)), CanEditMultipleObjects]
+public class MoveEditor: Editor
+{
+	public override void OnInspectorGUI()
+	{
+		var move = (Move)target;
+        string[] options = move.GetLayerNames();
+        move.TypeMove = (TypeMove)EditorGUILayout.EnumPopup("Select type move", move.TypeMove);
+		switch (move.TypeMove)
+		{
+			case TypeMove.StandartMove:
+				move.Speed = EditorGUILayout.Slider("Speed", move.Speed, 1f, 20f);
+				move.JumpForce = EditorGUILayout.Slider("Jump Force", move.JumpForce, 1f, 20f);
+                if (move.GroundBox == null)
+                    move.GroundBox = new GameObject("Ground Box");
+                move.GroundLayer= (LayerMask)EditorGUILayout.MaskField("Ground Layer", move.GroundLayer, options);
+                move.GroundBox = (GameObject)EditorGUILayout.ObjectField(move.GroundBox, typeof(GameObject), true);
+                move.BoxSize = EditorGUILayout.Vector2Field("Ground Box Size", move.BoxSize);
+				break;
+
+			case TypeMove.CellMove:
+				move.CellSize = EditorGUILayout.Vector2Field("Cell Size", move.CellSize);
+				move.SmoothTime = EditorGUILayout.Slider("Smooth Time", move.SmoothTime, 0f, 1f);
+                move.WallLayer = (LayerMask)EditorGUILayout.MaskField("Wall Layer", move.WallLayer, options);
+                break;
+		}
 	}
 }
