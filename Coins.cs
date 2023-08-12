@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class Coins : MonoBehaviour
@@ -8,7 +7,7 @@ public class Coins : MonoBehaviour
         if (collision.gameObject.name == "Player" || collision.gameObject.CompareTag("Player"))
         {
             Debug.Log(collision.gameObject.name + " Pickup Coin. +10 credits");
-            collision.transform.GetComponent<Move>().AddScore(10);
+            collision.transform.GetComponent<Score>().score += 10;
             Destroy(gameObject);
         }
     }
